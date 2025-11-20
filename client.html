@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>متجر أيفون الشعراوي</title>
+    <!-- إضافة مكتبة jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --primary-bg: #000000;
+            --secondary-bg: #121212;
+            --accent-color: #D4AF37;
+            --text-color: #FFFFFF;
+            --text-secondary: #CCCCCC;
+            --danger-color: #E74C3C;
+            --success-color: #2ECC71;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--primary-bg);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* تصميم الهيدر */
+        header {
+            background-color: var(--secondary-bg);
+            padding: 20px 0;
+            border-bottom: 2px solid var(--accent-color);
+            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.2);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .logo h1 {
+            color: var(--accent-color);
+            font-size: 2.2rem;
+            text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+        }
+        
+        .logo i {
+            font-size: 2rem;
+            color: var(--accent-color);
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 20px;
+        }
+        
+        nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        nav a:hover, nav a.active {
+            background-color: var(--accent-color);
+            color: var(--primary-bg);
+        }
+        
+        /* تصميم الأقسام */
+        .section {
+            display: none;
+            padding: 40px 0;
+            min-height: 70vh;
+        }
+        
+        .section.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--accent-color);
+            font-size: 2rem;
+            position: relative;
+            padding-bottom: 15px;
+        }
+        
+        .section-title:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background-color: var(--accent-color);
+        }
+        
+        /* تصميم النماذج */
+        .form-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: var(--secondary-bg);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            color: var(--text-color);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.3);
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 25px;
+            background-color: var(--accent-color);
+            color: var(--primary-bg);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .btn:hover {
+            background-color: #b8941f;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.4);
+        }
+        
+        .btn-block {
+            display: block;
+            width: 100%;
+        }
+        
+        .btn-danger {
+            background-color: var(--danger-color);
+        }
+        
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+        
+        .btn-success {
+            background-color: var(--success-color);
+        }
+        
+        .btn-success:hover {
+            background-color: #27ae60;
+        }
+        
+        .btn-pdf {
+            background: linear-gradient(135deg, #D4AF37, #b8941f);
+            color: #000;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-pdf:hover {
+            background: linear-gradient(135deg, #b8941f, #9c7c17);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.6);
+        }
+        
+        /* تصميم الجداول */
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: var(--secondary-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+        
+        th, td {
+            padding: 15px;
+            text-align: right;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        th {
+            background-color: rgba(212, 175, 55, 0.2);
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+        
+        tr:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .action-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+        
+        .edit-btn {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .delete-btn {
+            background-color: var(--danger-color);
+            color: white;
+        }
+        
+        /* تصميم البحث */
+        .search-container {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .search-input {
+            flex: 1;
+        }
+        
+        /* تصميم الرسائل */
+        .alert {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .alert-success {
+            background-color: rgba(46, 204, 113, 0.2);
+            border: 1px solid var(--success-color);
+            color: var(--success-color);
+        }
+        
+        .alert-danger {
+            background-color: rgba(231, 76, 60, 0.2);
+            border: 1px solid var(--danger-color);
+            color: var(--danger-color);
+        }
+        
+        /* تصميم الفوتر */
+        footer {
+            background-color: var(--secondary-bg);
+            padding: 30px 0;
+            text-align: center;
+            margin-top: 50px;
+            border-top: 1px solid rgba(212, 175, 55, 0.3);
+        }
+        
+        footer p {
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+        
+        /* تصميم الاستجابة للشاشات الصغيرة */
+        @media (max-width: 768px) {
+            nav ul {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .logo h1 {
+                font-size: 1.8rem;
+            }
+            
+            .form-container {
+                padding: 20px;
+            }
+            
+            th, td {
+                padding: 10px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+        
+        /* تصميم أزرار التحكم في لوحة المدير */
+        .admin-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            gap: 15px;
+        }
+        
+        @media (max-width: 768px) {
+            .admin-controls {
+                flex-direction: column;
+            }
+        }
+        
+        /* تصميم أزرار قسم بيانات العميل */
+        .customer-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .customer-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- الهيدر -->
+    <header>
+        <div class="container">
+            <div class="logo">
+                <i>📱</i>
+                <h1>متجر أيفون الشعراوي</h1>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#" class="nav-link active" data-target="home">الرئيسية</a></li>
+                    <li><a href="#" class="nav-link" data-target="customer-login">تسجيل العميل</a></li>
+                    <li><a href="#" class="nav-link" data-target="admin-login">تسجيل المدير</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- الأقسام -->
+    <main class="container">
+        <!-- قسم الرئيسية -->
+        <section id="home" class="section active">
+            <h2 class="section-title">مرحباً بك في متجر أيفون الشعراوي</h2>
+            <div class="form-container">
+                <p style="text-align: center; margin-bottom: 20px; color: var(--text-secondary);">
+                    نحن نقدم أفضل خدمة لعملائنا مع ضمان أمن بياناتكم. اختر الخدمة المناسبة لك من القائمة أعلاه.
+                </p>
+                <div style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
+                    <button class="btn" onclick="showSection('customer-login')">تسجيل الدخول للعميل</button>
+                    <button class="btn" onclick="showSection('admin-login')">تسجيل الدخول للمدير</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- قسم تسجيل العميل -->
+        <section id="customer-login" class="section">
+            <h2 class="section-title">تسجيل الدخول للعميل</h2>
+            <div class="form-container">
+                <div class="alert alert-success" id="customer-success"></div>
+                <div class="alert alert-danger" id="customer-error"></div>
+                <form id="customer-form">
+                    <div class="form-group">
+                        <label for="customer-national-id">الرقم القومي</label>
+                        <input type="text" id="customer-national-id" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="customer-name">الاسم بالكامل</label>
+                        <input type="text" id="customer-name" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn-block">عرض البيانات</button>
+                </form>
+                
+                <!-- سيظهر هذا القسم بعد تسجيل الدخول -->
+                <div id="customer-data" style="display: none; margin-top: 30px;">
+                    <h3 style="color: var(--accent-color); margin-bottom: 15px; text-align: center;">بياناتك الخاصة</h3>
+                    <div class="form-group">
+                        <label>الرقم القومي</label>
+                        <div class="form-control" id="display-national-id"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>الاسم</label>
+                        <div class="form-control" id="display-name"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>البريد الإلكتروني (iCloud)</label>
+                        <div class="form-control" id="display-email"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>كلمة المرور</label>
+                        <div class="form-control" id="display-password"></div>
+                    </div>
+                    
+                    <div class="customer-actions">
+                        <button class="btn btn-pdf btn-block" onclick="downloadCustomerPDF()">
+                            <span>📄</span> تنزيل البيانات كملف PDF
+                        </button>
+                        <button class="btn btn-danger" onclick="logoutCustomer()">تسجيل الخروج</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- قسم تسجيل المدير -->
+        <section id="admin-login" class="section">
+            <h2 class="section-title">تسجيل الدخول للمدير</h2>
+            <div class="form-container">
+                <div class="alert alert-success" id="admin-success"></div>
+                <div class="alert alert-danger" id="admin-error"></div>
+                <form id="admin-form">
+                    <div class="form-group">
+                        <label for="admin-username">اسم المستخدم</label>
+                        <input type="text" id="admin-username" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="admin-password">كلمة المرور</label>
+                        <input type="password" id="admin-password" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn-block">تسجيل الدخول</button>
+                </form>
+                
+                <!-- لوحة تحكم المدير -->
+                <div id="admin-dashboard" style="display: none; margin-top: 30px;">
+                    <h3 style="color: var(--accent-color); margin-bottom: 20px; text-align: center;">لوحة تحكم المدير</h3>
+                    
+                    <!-- أزرار التحكم -->
+                    <div class="admin-controls">
+                        <div class="search-container" style="flex: 1;">
+                            <input type="text" id="search-customers" class="form-control search-input" placeholder="ابحث عن عميل بالاسم أو الرقم القومي">
+                            <button class="btn" onclick="searchCustomers()">بحث</button>
+                        </div>
+                        <button class="btn btn-success" onclick="showAddCustomerForm()">إضافة عميل جديد</button>
+                    </div>
+                    
+                    <!-- نموذج إضافة عميل جديد -->
+                    <div id="add-customer-form" style="display: none; margin-bottom: 20px;">
+                        <div class="form-container" style="max-width: 100%;">
+                            <h4 style="color: var(--accent-color); margin-bottom: 20px; text-align: center;">إضافة عميل جديد</h4>
+                            <form id="new-customer-form">
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                                    <div class="form-group">
+                                        <label for="new-national-id">الرقم القومي</label>
+                                        <input type="text" id="new-national-id" class="form-control" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="new-name">الاسم بالكامل</label>
+                                        <input type="text" id="new-name" class="form-control" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="new-email">البريد الإلكتروني (iCloud)</label>
+                                        <input type="email" id="new-email" class="form-control" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="new-password">كلمة المرور</label>
+                                        <input type="text" id="new-password" class="form-control" required>
+                                    </div>
+                                </div>
+                                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                                    <button type="submit" class="btn btn-success" style="flex: 1;">حفظ العميل</button>
+                                    <button type="button" class="btn btn-danger" onclick="hideAddCustomerForm()" style="flex: 1;">إلغاء</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <!-- جدول العملاء -->
+                    <div class="table-container">
+                        <table id="customers-table">
+                            <thead>
+                                <tr>
+                                    <th>الرقم القومي</th>
+                                    <th>الاسم</th>
+                                    <th>البريد الإلكتروني</th>
+                                    <th>كلمة المرور</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="customers-table-body">
+                                <!-- سيتم ملء هذا الجدول بالبيانات -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <button class="btn btn-block" style="margin-top: 20px;" onclick="logoutAdmin()">تسجيل الخروج</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- الفوتر -->
+    <footer>
+        <div class="container">
+            <p>جميع الحقوق محفوظة &copy; 2026 متجر أيفون الشعراوي</p>
+            <p>تم تصميم هذا الموقع من خلال المهندس / عمر صالح 01005590440</p>
+        </div>
+    </footer>
+
+    <!-- عنصر مخفي لإنشاء PDF -->
+    <div id="pdf-template" style="display: none;">
+        <div style="background: linear-gradient(135deg, #000000, #121212); color: #D4AF37; padding: 30px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center;">
+            <h1 style="font-size: 28px; margin-bottom: 10px; border-bottom: 2px solid #D4AF37; padding-bottom: 10px; display: inline-block;">متجر أيفون الشعراوي</h1>
+            <h2 style="font-size: 22px; margin: 20px 0; color: #FFFFFF;">بيانات العميل</h2>
+            
+            <div style="background-color: rgba(212, 175, 55, 0.1); border: 1px solid #D4AF37; border-radius: 10px; padding: 20px; margin: 20px 0; text-align: right;">
+                <div style="margin-bottom: 15px;">
+                    <strong style="color: #D4AF37; display: inline-block; width: 150px;">الرقم القومي:</strong>
+                    <span style="color: #FFFFFF;" id="pdf-national-id"></span>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <strong style="color: #D4AF37; display: inline-block; width: 150px;">الاسم:</strong>
+                    <span style="color: #FFFFFF;" id="pdf-name"></span>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <strong style="color: #D4AF37; display: inline-block; width: 150px;">البريد الإلكتروني:</strong>
+                    <span style="color: #FFFFFF;" id="pdf-email"></span>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <strong style="color: #D4AF37; display: inline-block; width: 150px;">كلمة المرور:</strong>
+                    <span style="color: #FFFFFF;" id="pdf-password"></span>
+                </div>
+            </div>
+            
+            <div style="margin-top: 30px; color: #CCCCCC; font-size: 14px;">
+                <p>تم إنشاء هذا المستند في: <span id="pdf-date"></span></p>
+                <p>لأي استفسار، يرجى التواصل مع خدمة العملاء</p>
+            </div>
+            
+            <div style="margin-top: 20px; border-top: 1px solid #D4AF37; padding-top: 10px; color: #CCCCCC; font-size: 12px;">
+                <p>جميع الحقوق محفوظة &copy; 2026 متجر أيفون الشعراوي</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // بيانات محاكاة للتخزين (في التطبيق الحقيقي سيتم استخدام قاعدة بيانات آمنة)
+        let customers = JSON.parse(localStorage.getItem('iphoneStoreCustomers')) || [];
+        const adminCredentials = {
+            username: 'metw11225',
+            password: '0056$moter'
+        };
+        
+        // عرض القسم المحدد وإخفاء الآخرين
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) targetSection.classList.add('active');
+
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            // تصحيح اختيار رابط التنقل باستخدام محدد صالح والتحقق من وجوده
+            const activeNav = document.querySelector(`.nav-link[data-target="${sectionId}"]`);
+            if (activeNav) activeNav.classList.add('active');
+        }
+        
+        // إضافة مستمعي الأحداث
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = this.getAttribute('data-target');
+                showSection(target);
+            });
+        });
+        
+        // تسجيل دخول العميل
+        document.getElementById('customer-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const nationalId = document.getElementById('customer-national-id').value;
+            const name = document.getElementById('customer-name').value;
+            
+            // البحث عن العميل
+            const customer = customers.find(c => c.nationalId === nationalId && c.name === name);
+            
+            if (customer) {
+                // عرض بيانات العميل
+                document.getElementById('display-national-id').textContent = customer.nationalId;
+                document.getElementById('display-name').textContent = customer.name;
+                document.getElementById('display-email').textContent = customer.email;
+                document.getElementById('display-password').textContent = customer.password;
+                
+                document.getElementById('customer-data').style.display = 'block';
+                document.getElementById('customer-form').style.display = 'none';
+                showAlert('customer-success', 'تم العثور على بياناتك بنجاح!');
+            } else {
+                showAlert('customer-error', 'البيانات غير صحيحة أو العميل غير مسجل');
+            }
+        });
+        
+        // تسجيل دخول المدير
+        document.getElementById('admin-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('admin-username').value;
+            const password = document.getElementById('admin-password').value;
+            
+            if (username === adminCredentials.username && password === adminCredentials.password) {
+                document.getElementById('admin-dashboard').style.display = 'block';
+                document.getElementById('admin-form').style.display = 'none';
+                showAlert('admin-success', 'تم تسجيل الدخول بنجاح!');
+                loadCustomersTable();
+            } else {
+                showAlert('admin-error', 'بيانات الدخول غير صحيحة');
+            }
+        });
+        
+        // تحميل جدول العملاء
+        function loadCustomersTable() {
+            const tableBody = document.getElementById('customers-table-body');
+            tableBody.innerHTML = '';
+            
+            customers.forEach((customer, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${customer.nationalId}</td>
+                    <td>${customer.name}</td>
+                    <td>${customer.email}</td>
+                    <td>${customer.password}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="action-btn edit-btn" onclick="editCustomer(${index})">تعديل</button>
+                            <button class="action-btn delete-btn" onclick="deleteCustomer(${index})">حذف</button>
+                        </div>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+        
+        // البحث عن العملاء
+        function searchCustomers() {
+            const searchTerm = document.getElementById('search-customers').value.toLowerCase();
+            const tableBody = document.getElementById('customers-table-body');
+            tableBody.innerHTML = '';
+
+            const filteredCustomers = customers.filter(customer => 
+                (customer.name || '').toLowerCase().includes(searchTerm) || 
+                String(customer.nationalId || '').toLowerCase().includes(searchTerm)
+            );
+
+            filteredCustomers.forEach((customer, index) => {
+                const originalIndex = customers.findIndex(c => c.nationalId === customer.nationalId);
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${customer.nationalId}</td>
+                    <td>${customer.name}</td>
+                    <td>${customer.email}</td>
+                    <td>${customer.password}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="action-btn edit-btn" onclick="editCustomer(${originalIndex})">تعديل</button>
+                            <button class="action-btn delete-btn" onclick="deleteCustomer(${originalIndex})">حذف</button>
+                        </div>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+        
+        // تعديل بيانات العميل
+        function editCustomer(index) {
+            const customer = customers[index];
+            const newEmail = prompt('أدخل البريد الإلكتروني الجديد:', customer.email);
+            const newPassword = prompt('أدخل كلمة المرور الجديدة:', customer.password);
+            
+            if (newEmail && newPassword) {
+                customers[index].email = newEmail;
+                customers[index].password = newPassword;
+                localStorage.setItem('iphoneStoreCustomers', JSON.stringify(customers));
+                loadCustomersTable();
+                showAlert('admin-success', 'تم تعديل بيانات العميل بنجاح');
+            }
+        }
+        
+        // حذف العميل
+        function deleteCustomer(index) {
+            if (confirm('هل أنت متأكد من حذف هذا العميل؟')) {
+                customers.splice(index, 1);
+                localStorage.setItem('iphoneStoreCustomers', JSON.stringify(customers));
+                loadCustomersTable();
+                showAlert('admin-success', 'تم حذف العميل بنجاح');
+            }
+        }
+        
+        // تسجيل خروج العميل
+        function logoutCustomer() {
+            document.getElementById('customer-data').style.display = 'none';
+            document.getElementById('customer-form').style.display = 'block';
+            document.getElementById('customer-form').reset();
+            showSection('home');
+        }
+        
+        // تسجيل خروج المدير
+        function logoutAdmin() {
+            document.getElementById('admin-dashboard').style.display = 'none';
+            document.getElementById('admin-form').style.display = 'block';
+            document.getElementById('admin-form').reset();
+            showSection('home');
+        }
+        
+        // عرض رسائل التنبيه
+        function showAlert(alertId, message) {
+            const alertElement = document.getElementById(alertId);
+            alertElement.textContent = message;
+            alertElement.style.display = 'block';
+            
+            setTimeout(() => {
+                alertElement.style.display = 'none';
+            }, 5000);
+        }
+        
+        // عرض نموذج إضافة عميل جديد
+        function showAddCustomerForm() {
+            document.getElementById('add-customer-form').style.display = 'block';
+        }
+        
+        // إخفاء نموذج إضافة عميل جديد
+        function hideAddCustomerForm() {
+            document.getElementById('add-customer-form').style.display = 'none';
+            document.getElementById('new-customer-form').reset();
+        }
+        
+        // إضافة عميل جديد
+        document.getElementById('new-customer-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const nationalId = document.getElementById('new-national-id').value;
+            const name = document.getElementById('new-name').value;
+            const email = document.getElementById('new-email').value;
+            const password = document.getElementById('new-password').value;
+            
+            // التحقق من عدم وجود رقم قومي مكرر
+            const existingCustomer = customers.find(c => c.nationalId === nationalId);
+            if (existingCustomer) {
+                alert('هذا الرقم القومي مسجل مسبقاً!');
+                return;
+            }
+            
+            // إضافة العميل الجديد
+            const newCustomer = {
+                nationalId: nationalId,
+                name: name,
+                email: email,
+                password: password
+            };
+            
+            customers.push(newCustomer);
+            localStorage.setItem('iphoneStoreCustomers', JSON.stringify(customers));
+            
+            // إعادة تحميل الجدول وإخفاء النموذج
+            loadCustomersTable();
+            hideAddCustomerForm();
+            showAlert('admin-success', 'تم إضافة العميل بنجاح!');
+        });
+        
+        // تنزيل بيانات العميل كملف PDF
+        function downloadCustomerPDF() {
+            // الحصول على بيانات العميل
+            const nationalId = document.getElementById('display-national-id').textContent;
+            const name = document.getElementById('display-name').textContent;
+            const email = document.getElementById('display-email').textContent;
+            const password = document.getElementById('display-password').textContent;
+            
+            // تحديث بيانات PDF
+            document.getElementById('pdf-national-id').textContent = nationalId;
+            document.getElementById('pdf-name').textContent = name;
+            document.getElementById('pdf-email').textContent = email;
+            document.getElementById('pdf-password').textContent = password;
+            
+            // إضافة التاريخ الحالي
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('ar-EG', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            document.getElementById('pdf-date').textContent = dateStr;
+            
+            // استخدام html2canvas لالتقاط المحتوى
+            const pdfElement = document.getElementById('pdf-template');
+            if (!pdfElement) {
+                showAlert('customer-error', 'عنصر PDF غير موجود');
+                return;
+            }
+
+            // اجعل العنصر مرئياً مؤقتاً خارج الشاشة ليتم التقاطه
+            const prevDisplay = pdfElement.style.display;
+            const prevPosition = pdfElement.style.position;
+            const prevLeft = pdfElement.style.left;
+            pdfElement.style.display = 'block';
+            pdfElement.style.position = 'absolute';
+            pdfElement.style.left = '-9999px';
+
+            html2canvas(pdfElement, {
+                scale: 2,
+                useCORS: true,
+                logging: false,
+                backgroundColor: '#000000'
+            }).then(canvas => {
+                // إعادة الحالة الأصلية للعنصر
+                pdfElement.style.display = prevDisplay;
+                pdfElement.style.position = prevPosition;
+                pdfElement.style.left = prevLeft;
+
+                const imgData = canvas.toDataURL('image/png');
+                // احصل على مُنشئ jsPDF بشكل آمن من النطاق العالمي
+                const jsPDFConstructor = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF || null;
+                if (!jsPDFConstructor) {
+                    showAlert('customer-error', 'خطأ في إنشاء PDF: مكتبة jsPDF غير محمّلة');
+                    return;
+                }
+                const pdf = new jsPDFConstructor('p', 'mm', 'a4');
+                const imgWidth = 210;
+                const pageHeight = 295;
+                const imgHeight = canvas.height * imgWidth / canvas.width;
+                let heightLeft = imgHeight;
+                
+                let position = 0;
+                
+                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+                
+                while (heightLeft >= 0) {
+                    position = heightLeft - imgHeight;
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                }
+                
+                // حفظ الملف باسم صالح كسلسلة
+                const safeName = (name || 'عميل').replace(/[\s\\/:"*?<>|]+/g, '_');
+                const filename = `بيانات_العميل_${safeName}_${nationalId || ''}.pdf`;
+                pdf.save(filename);
+                
+                // عرض رسالة نجاح
+                showAlert('customer-success', 'تم تنزيل ملف PDF بنجاح!');
+            }).catch(err => {
+                // إعادة الحالة الأصلية عند الخطأ
+                pdfElement.style.display = prevDisplay;
+                pdfElement.style.position = prevPosition;
+                pdfElement.style.left = prevLeft;
+                showAlert('customer-error', 'فشل إنشاء ملف PDF');
+                console.error(err);
+            });
+            localStorage.setItem('iphoneStoreCustomers', JSON.stringify(customers));
+        }
+    </script>
+</body>
+</html>
